@@ -136,6 +136,64 @@ main{max-width:760px;margin:0 auto;padding:0 14px}
   border:1.5px dashed var(--line);border-radius:var(--radius);
 }
 
+/* ---- Ugens mål (personlig) ---- */
+.goal-week{font-size:12px;font-weight:700;color:var(--ink-soft);margin:-6px 0 10px}
+.goal{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:13px;margin-bottom:9px;position:relative;overflow:hidden;
+}
+.goal.won{background:var(--green-soft);border-color:var(--green)}
+.goal-text{font-weight:700;font-size:14.5px;padding-right:70px}
+.goal.won .goal-text{color:var(--green)}
+.goal-stamp{
+  position:absolute;top:11px;right:11px;font-size:10px;font-weight:800;letter-spacing:.12em;
+  background:var(--green);color:#fff;padding:4px 9px;border-radius:6px;transform:rotate(3deg);
+}
+.goal-prog{display:flex;align-items:center;gap:10px;margin-top:10px}
+.goal-bar{flex:1;height:8px;background:#ECE8E0;border-radius:99px;overflow:hidden}
+.goal-bar i{display:block;height:100%;background:var(--amber);border-radius:99px;transition:width .3s ease}
+.goal.won .goal-bar i{background:var(--green)}
+.goal-count{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
+.goal-actions{display:flex;gap:7px;margin-top:11px}
+.goal-actions button{
+  border-radius:10px;padding:9px 13px;font-size:13px;font-weight:800;border:1.5px solid var(--line);
+  background:#fff;color:var(--ink-soft);
+}
+.goal-actions .g-plus{background:var(--espresso);border-color:var(--espresso);color:#fff;flex:1}
+.goal-actions .g-done{background:var(--green);border-color:var(--green);color:#fff;flex:1}
+.goal-actions .g-del{flex:0}
+.goal-add{
+  border:1.5px dashed var(--line);border-radius:var(--radius);padding:13px;background:transparent;
+}
+.goal-add input[type=text]{
+  width:100%;font:inherit;font-size:15px;padding:10px 12px;border:1.5px solid var(--line);
+  border-radius:10px;background:var(--card);color:var(--ink);
+}
+.goal-add-row{display:flex;gap:8px;margin-top:8px;align-items:center}
+.goal-add-row input[type=number]{
+  width:84px;font:inherit;font-size:15px;padding:10px;border:1.5px solid var(--line);
+  border-radius:10px;background:var(--card);color:var(--ink);
+}
+.goal-add-row .g-lbl{font-size:12px;color:var(--ink-soft);flex:1}
+.goal-add-row button{
+  background:var(--green);border:0;color:#fff;font-weight:800;font-size:13.5px;
+  padding:11px 16px;border-radius:10px;
+}
+.wall{
+  background:var(--espresso);color:var(--paper);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:14px;display:flex;align-items:center;gap:14px;margin-top:12px;
+}
+.wall-num{font-family:Georgia,serif;font-size:34px;font-weight:700;line-height:1;color:#F2C94C}
+.wall-txt{font-size:12.5px;color:#D8CBB8;line-height:1.4}
+.wall-txt b{color:var(--paper)}
+/* konfetti */
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:99;overflow:hidden}
+.cf{position:absolute;top:-12px;width:9px;height:13px;border-radius:2px;animation:cfFall linear forwards}
+@keyframes cfFall{
+  0%{transform:translateY(0) rotate(0deg);opacity:1}
+  100%{transform:translateY(105vh) rotate(660deg);opacity:.85}
+}
+
 /* ---- Leverandører ---- */
 .search{
   width:100%;font:inherit;font-size:16px;padding:12px 14px;border:1.5px solid var(--line);
@@ -207,12 +265,25 @@ footer{max-width:760px;margin:30px auto 0;padding:16px 14px 0;border-top:1px sol
     <div id="calendar"></div>
   </div>
 
+  <div class="sec-label" id="t-goals"></div>
+  <div class="goal-week" id="goalWeek"></div>
+  <div id="goals"></div>
+  <div class="goal-add">
+    <input type="text" id="goalText" maxlength="120">
+    <div class="goal-add-row">
+      <span class="g-lbl" id="t-goaltarget"></span>
+      <input type="number" id="goalTarget" min="1" max="99" inputmode="numeric" placeholder="–">
+      <button onclick="addGoal()" id="t-goaladd"></button>
+    </div>
+  </div>
+  <div id="wall"></div>
+
   <div class="sec-label" id="t-sup"></div>
   <input class="search" id="supSearch" type="search" oninput="renderSuppliers()">
   <div id="suppliers"></div>
 </main>
 
-<footer>Kaiser Ledelse v1.2</footer>
+<footer>Kaiser Ledelse v1.3</footer>
 
 <script>
 /* ============================================================
@@ -237,13 +308,13 @@ footer{max-width:760px;margin:30px auto 0;padding:16px 14px 0;border-top:1px sol
 const TOOLS = [
   {name:{da:"Vagtvarsling",en:"Staffing alerts"},
    desc:{da:"Kalender, events & bemandingsvarsler",en:"Calendar, events & staffing alerts"},
-   ico:"📅", color:"#3E2F23", url:"https://nielsendesignpictures-hub.github.io/Event/index.html"},
+   ico:"📅", color:"#3E2F23", url:""},
   {name:{da:"Kontrolkalender",en:"Inspection calendar"},
    desc:{da:"FVST-kampagner 2026 & smiley-status",en:"Food authority campaigns & smiley status"},
-   ico:"🛡", color:"#B3402F", url:"https://nielsendesignpictures-hub.github.io/Kaiser-standartkontrol/eg.html"},
+   ico:"🛡", color:"#B3402F", url:"../kontrolkalender/"},
   {name:{da:"Håndværker",en:"Contractor status"},
    desc:{da:"Fejlmeldinger & status pr. café",en:"Fault reports & status per café"},
-   ico:"🔧", color:"#C08A2D", url:"https://nielsendesignpictures-hub.github.io/Kaiser-standartkontrol/contractor/cafe.html"}
+   ico:"🔧", color:"#C08A2D", url:""}
 ];
 
 const EVENTS = [
@@ -274,20 +345,20 @@ const EVENTS = [
 ];
 
 const SUPPLIERS = [
-  {name:"Multiline",          cat:"", contact:"", phone:"7010 7700",            email:"",                customerNo:"", covers:"", note:"Takeaway,rengøring"},
+  {name:"Multiline",          cat:"", contact:"", phone:"",            email:"",                customerNo:"", covers:"", note:""},
   {name:"Daarbak",            cat:"", contact:"", phone:"",            email:"",                customerNo:"", covers:"", note:""},
-  {name:"BC Catering",        cat:"", contact:"", phone:"46 77 35 00", email:"",                customerNo:"", covers:"", note:"Mad & Div"},
-  {name:"Oskar Davidsen",     cat:"", contact:"", phone:"43 45 14 22", email:"",                customerNo:"", covers:"", note:"Vin"},
-  {name:"Kaffe Bønnen",       cat:"", contact:"", phone:"77 77 60 60", email:"",                customerNo:"", covers:"", note:"Kaffe"},
+  {name:"BC Catering",        cat:"", contact:"", phone:"46 77 35 00", email:"",                customerNo:"", covers:"", note:""},
+  {name:"Oskar Davidsen",     cat:"", contact:"", phone:"43 45 14 22", email:"",                customerNo:"", covers:"", note:""},
+  {name:"Kaffe Bønnen",       cat:"", contact:"", phone:"77 77 60 60", email:"",                customerNo:"", covers:"", note:""},
   {name:"Royal",              cat:"", contact:"", phone:"56 77 15 00", email:"",                customerNo:"", covers:"", note:"Leverandør af øl og sodavand."},
-  {name:"Brønnum",            cat:"", contact:"", phone:"44 88 84 00", email:"",                customerNo:"", covers:"", note:"Iventar"},
-  {name:"Sirup – Kasper",     cat:"", contact:"Kasper", phone:"27 10 15 15", email:"kv@innsale.com", customerNo:"", covers:"", note:"Sirup"},
+  {name:"Brønnum",            cat:"", contact:"", phone:"44 88 84 00", email:"",                customerNo:"", covers:"", note:""},
+  {name:"Sirup – Kasper",     cat:"", contact:"Kasper", phone:"27 10 15 15", email:"kv@innsale.com", customerNo:"", covers:"", note:""},
   {name:"Friture afhentning", cat:"", contact:"", phone:"81 74 09 07", email:"",                customerNo:"", covers:"", note:"Send SMS med adresse og firmanavn."},
-  {name:"Flatpay – Dankort",  cat:"", contact:"", phone:"88 77 39 39", email:"",                customerNo:"", covers:"", note:"Dankort terminaler"},
-  {name:"Easytablebooking",   cat:"", contact:"", phone:"55 55 55 05", email:"",                customerNo:"", covers:"", note:"Booking system"},
-  {name:"Frontliners",        cat:"", contact:"", phone:"31 53 00 99", email:"",                customerNo:"", covers:"", note:"Vagtplan system"},
-  {name:"Service lovers",     cat:"", contact:"", phone:"31 31 11 10", email:"",                customerNo:"", covers:"", note:"Service lovers"},
-  {name:"WOLT",               cat:"", contact:"", phone:"20 63 64 99", email:"",                customerNo:"", covers:"", note:"Take away"}
+  {name:"Flatpay – Dankort",  cat:"", contact:"", phone:"88 77 39 39", email:"",                customerNo:"", covers:"", note:""},
+  {name:"Easytablebooking",   cat:"", contact:"", phone:"55 55 55 05", email:"",                customerNo:"", covers:"", note:""},
+  {name:"Frontliners",        cat:"", contact:"", phone:"31 53 00 99", email:"",                customerNo:"", covers:"", note:""},
+  {name:"Service lovers",     cat:"", contact:"", phone:"31 31 11 10", email:"",                customerNo:"", covers:"", note:""},
+  {name:"WOLT",               cat:"", contact:"", phone:"20 63 64 99", email:"",                customerNo:"", covers:"", note:""}
 ];
 /* ============================================================
    ★ SLUT PÅ KONFIGURATION — resten behøver du ikke røre ★
@@ -300,6 +371,13 @@ const T = {
     types:{menu:"Menuskift", lukket:"Lukkedag", stor:"Stor dag", info:"Andet"},
     nextUp:"Næste", inDays:d=>d===0?"i dag":(d===1?"i morgen":"om "+d+" dage"),
     showCal:"Vis hele kalenderen", hideCal:"Skjul kalenderen",
+    goals:"Ugens mål · personlig", goalWeek:w=>"Uge "+w+" · nulstilles automatisk hver mandag",
+    goalPh:"Fx: 5 anerkendelser der ikke handler om fejl",
+    goalTarget:"Antal (tomt = ja/nej-mål):", goalAdd:"Tilføj mål",
+    goalPlus:"+1", goalDone:"Nået! ✓", goalDel:"✕", goalWon:"SEJR ✓",
+    goalConfirmDel:"Slet dette mål?",
+    wallTxt:(w,tot)=>w===1?"<b>1 sejr</b> i alt. Små sejre tæller – fejr dem.":"<b>"+w+" sejre</b> i alt på tværs af "+tot+" mål. Små sejre tæller – fejr dem.",
+    wallEmpty:"Sejrsvæggen venter på din første sejr.",
     noEvents:"Ingen begivenheder i dette år endnu – tilføj dem i EVENTS-listen i koden.",
     noSup:q=>"Ingen leverandører matcher \u201E"+q+"\u201C.",
     contact:"Kontakt", phone:"Telefon", email:"E-mail", custNo:"Kundenr.",
@@ -314,6 +392,13 @@ const T = {
     types:{menu:"Menu change", lukket:"Closed", stor:"Big day", info:"Other"},
     nextUp:"Next", inDays:d=>d===0?"today":(d===1?"tomorrow":"in "+d+" days"),
     showCal:"Show full calendar", hideCal:"Hide calendar",
+    goals:"Weekly goals · personal", goalWeek:w=>"Week "+w+" · resets automatically every Monday",
+    goalPh:"E.g.: 5 shout-outs that aren't about mistakes",
+    goalTarget:"Count (empty = yes/no goal):", goalAdd:"Add goal",
+    goalPlus:"+1", goalDone:"Done! ✓", goalDel:"✕", goalWon:"WIN ✓",
+    goalConfirmDel:"Delete this goal?",
+    wallTxt:(w,tot)=>w===1?"<b>1 win</b> in total. Small wins count – celebrate them.":"<b>"+w+" wins</b> in total across "+tot+" goals. Small wins count – celebrate them.",
+    wallEmpty:"The wall of wins is waiting for your first one.",
     noEvents:"No events this year yet – add them to the EVENTS list in the code.",
     noSup:q=>"No suppliers match \u201C"+q+"\u201D.",
     contact:"Contact", phone:"Phone", email:"Email", custNo:"Customer no.",
@@ -365,6 +450,7 @@ function renderAll(){
   renderTools();
   renderNextUp();
   renderCal();
+  renderGoals();
   renderSuppliers();
 }
 
@@ -436,6 +522,125 @@ function renderCal(){
   renderNextUp();
 }
 function toggleType(ty){activeTypes[ty]=!activeTypes[ty];renderCal();}
+
+/* ---- Ugens mål (personlig, gemmes kun på denne enhed) ---- */
+function isoWeek(d){
+  const x=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  const day=x.getUTCDay()||7;
+  x.setUTCDate(x.getUTCDate()+4-day);
+  const y0=new Date(Date.UTC(x.getUTCFullYear(),0,1));
+  return {y:x.getUTCFullYear(), w:Math.ceil(((x-y0)/86400000+1)/7)};
+}
+function weekKey(){const k=isoWeek(new Date());return k.y+"-W"+String(k.w).padStart(2,"0");}
+
+function loadGoals(){
+  let g;
+  try{g=JSON.parse(lsGet("goals",'{"current":[],"archive":[]}'));}catch(e){g={current:[],archive:[]};}
+  /* ugerul: flyt gamle mål til arkivet */
+  const wk=weekKey();
+  const stay=[],gone=[];
+  (g.current||[]).forEach(x=>(x.week===wk?stay:gone).push(x));
+  if(gone.length){g.archive=(g.archive||[]).concat(gone);g.current=stay;saveGoals(g);}
+  else{g.current=stay;}
+  return g;
+}
+function saveGoals(g){lsSet("goals",JSON.stringify(g));}
+
+function addGoal(){
+  const txtEl=document.getElementById("goalText");
+  const tgtEl=document.getElementById("goalTarget");
+  const text=(txtEl.value||"").trim();
+  if(!text)return txtEl.focus();
+  const target=parseInt(tgtEl.value,10);
+  const g=loadGoals();
+  g.current.push({
+    id:Date.now(), text:text, week:weekKey(),
+    type:(target>0?"count":"done"),
+    target:(target>0?target:1), progress:0, won:false
+  });
+  saveGoals(g);
+  txtEl.value="";tgtEl.value="";
+  renderGoals();
+}
+function goalPlus(id){
+  const g=loadGoals();
+  const x=g.current.find(x=>x.id===id);
+  if(!x||x.won)return;
+  x.progress++;
+  if(x.progress>=x.target){x.won=true;x.wonTs=Date.now();celebrate();}
+  saveGoals(g);renderGoals();
+}
+function goalDoneMark(id){
+  const g=loadGoals();
+  const x=g.current.find(x=>x.id===id);
+  if(!x||x.won)return;
+  x.progress=x.target;x.won=true;x.wonTs=Date.now();
+  celebrate();saveGoals(g);renderGoals();
+}
+function goalDel(id){
+  if(!confirm(t().goalConfirmDel))return;
+  const g=loadGoals();
+  g.current=g.current.filter(x=>x.id!==id);
+  saveGoals(g);renderGoals();
+}
+function celebrate(){
+  if(navigator.vibrate)navigator.vibrate([40,60,40]);
+  if(window.matchMedia&&window.matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  let c=document.getElementById("confetti");
+  if(!c){c=document.createElement("div");c.id="confetti";document.body.appendChild(c);}
+  const colors=["#F2C94C","#1F7A4D","#C08A2D","#B3402F","#F7F2E9","#8A7A63"];
+  for(let i=0;i<70;i++){
+    const p=document.createElement("i");
+    p.className="cf";
+    p.style.left=(Math.random()*100)+"vw";
+    p.style.background=colors[i%colors.length];
+    p.style.animationDuration=(1+Math.random()*1.1)+"s";
+    p.style.animationDelay=(Math.random()*.35)+"s";
+    p.style.width=(6+Math.random()*7)+"px";
+    p.style.height=(9+Math.random()*8)+"px";
+    c.appendChild(p);
+    setTimeout(()=>p.remove(),2600);
+  }
+}
+function renderGoals(){
+  const g=loadGoals();
+  const wk=isoWeek(new Date());
+  document.getElementById("t-goals").textContent=t().goals;
+  document.getElementById("goalWeek").textContent=t().goalWeek(wk.w);
+  document.getElementById("goalText").placeholder=t().goalPh;
+  document.getElementById("t-goaltarget").textContent=t().goalTarget;
+  document.getElementById("t-goaladd").textContent=t().goalAdd;
+
+  document.getElementById("goals").innerHTML=g.current.map(x=>{
+    const pct=Math.min(100,x.progress/x.target*100);
+    let actions="";
+    if(!x.won){
+      actions=x.type==="count"
+        ?`<button class="g-plus" onclick="goalPlus(${x.id})">${t().goalPlus}</button>`
+        :`<button class="g-done" onclick="goalDoneMark(${x.id})">${t().goalDone}</button>`;
+    }
+    actions+=`<button class="g-del" onclick="goalDel(${x.id})" aria-label="Slet">${t().goalDel}</button>`;
+    const prog=x.type==="count"
+      ?`<div class="goal-prog"><div class="goal-bar"><i style="width:${pct}%"></i></div>
+        <span class="goal-count">${x.progress}/${x.target}</span></div>`
+      :"";
+    return `<div class="goal ${x.won?"won":""}">
+      ${x.won?`<span class="goal-stamp">${t().goalWon}</span>`:""}
+      <div class="goal-text">${esc(x.text)}</div>
+      ${prog}
+      <div class="goal-actions">${actions}</div>
+    </div>`;
+  }).join("");
+
+  /* sejrsvæg */
+  const archWins=(g.archive||[]).filter(x=>x.won).length;
+  const curWins=g.current.filter(x=>x.won).length;
+  const wins=archWins+curWins;
+  const tot=(g.archive||[]).length+g.current.length;
+  document.getElementById("wall").innerHTML=wins
+    ?`<div class="wall"><span class="wall-num">${wins}</span><span class="wall-txt">${t().wallTxt(wins,tot)}</span></div>`
+    :`<div class="wall"><span class="wall-num">0</span><span class="wall-txt">${esc(t().wallEmpty)}</span></div>`;
+}
 
 /* ---- Leverandører ---- */
 function telHref(p){return "tel:"+String(p).replace(/[^\d+]/g,"");}

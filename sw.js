@@ -1,6 +1,6 @@
 /* Kaiser Ledelse – service worker
    Network-first for HTML, cache-first for assets. Bump VERSION ved deploy. */
-var VERSION = "kl-v1.2.0";
+var VERSION = "kl-v1.3.0";
 var ASSETS = ["./", "./index.html", "./manifest.webmanifest", "./icon-192.png", "./logo.png", "./icon-512.png"];
 
 self.addEventListener("install", function (e) {

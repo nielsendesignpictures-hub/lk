@@ -194,6 +194,38 @@ main{max-width:760px;margin:0 auto;padding:0 14px}
   100%{transform:translateY(105vh) rotate(660deg);opacity:.85}
 }
 
+/* ---- To-do (pr. enhed) ---- */
+.todo-add{display:flex;gap:8px;margin-bottom:10px}
+.todo-add input{
+  flex:1;font:inherit;font-size:16px;padding:11px 13px;border:1.5px solid var(--line);
+  border-radius:12px;background:var(--card);color:var(--ink);min-width:0;
+}
+.todo-add button{
+  background:var(--espresso);border:0;color:#fff;font-weight:800;font-size:14px;
+  padding:0 18px;border-radius:12px;flex-shrink:0;
+}
+.todo{
+  background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);
+  padding:11px 12px;margin-bottom:7px;display:flex;align-items:center;gap:11px;
+}
+.todo-chk{
+  appearance:none;-webkit-appearance:none;width:23px;height:23px;flex-shrink:0;
+  border:2px solid var(--taupe);border-radius:8px;background:#fff;cursor:pointer;position:relative;margin:0;
+}
+.todo-chk:checked{background:var(--green);border-color:var(--green)}
+.todo-chk:checked::after{
+  content:"";position:absolute;left:6px;top:2px;width:6px;height:12px;
+  border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(42deg);
+}
+.todo-txt{flex:1;font-size:14.5px;font-weight:600;min-width:0;overflow-wrap:break-word}
+.todo.done{opacity:.55}
+.todo.done .todo-txt{text-decoration:line-through;text-decoration-color:#C5BBA9;color:var(--ink-soft)}
+.todo-del{background:transparent;border:0;color:var(--ink-soft);font-size:15px;font-weight:800;padding:4px 6px;flex-shrink:0}
+.todo-clear{
+  display:block;width:100%;text-align:center;background:transparent;border:1.5px dashed var(--line);
+  border-radius:12px;padding:10px;font-size:12.5px;font-weight:700;color:var(--ink-soft);margin-top:4px;
+}
+
 /* ---- Leverandører ---- */
 .search{
   width:100%;font:inherit;font-size:16px;padding:12px 14px;border:1.5px solid var(--line);
@@ -278,12 +310,19 @@ footer{max-width:760px;margin:30px auto 0;padding:16px 14px 0;border-top:1px sol
   </div>
   <div id="wall"></div>
 
+  <div class="sec-label" id="t-todo"></div>
+  <div class="todo-add">
+    <input type="text" id="todoText" maxlength="140" onkeydown="if(event.key==='Enter')addTodo()">
+    <button onclick="addTodo()" id="t-todoadd"></button>
+  </div>
+  <div id="todos"></div>
+
   <div class="sec-label" id="t-sup"></div>
   <input class="search" id="supSearch" type="search" oninput="renderSuppliers()">
   <div id="suppliers"></div>
 </main>
 
-<footer>Kaiser Ledelse v1.3</footer>
+<footer>Kaiser Ledelse v1.4</footer>
 
 <script>
 /* ============================================================
@@ -308,13 +347,13 @@ footer{max-width:760px;margin:30px auto 0;padding:16px 14px 0;border-top:1px sol
 const TOOLS = [
   {name:{da:"Vagtvarsling",en:"Staffing alerts"},
    desc:{da:"Kalender, events & bemandingsvarsler",en:"Calendar, events & staffing alerts"},
-   ico:"📅", color:"#3E2F23", url:""},
+   ico:"📅", color:"#3E2F23", url:"https://nielsendesignpictures-hub.github.io/Event/index.html"},
   {name:{da:"Kontrolkalender",en:"Inspection calendar"},
    desc:{da:"FVST-kampagner 2026 & smiley-status",en:"Food authority campaigns & smiley status"},
    ico:"🛡", color:"#B3402F", url:"../kontrolkalender/"},
   {name:{da:"Håndværker",en:"Contractor status"},
    desc:{da:"Fejlmeldinger & status pr. café",en:"Fault reports & status per café"},
-   ico:"🔧", color:"#C08A2D", url:""}
+   ico:"🔧", color:"#C08A2D", url:"https://nielsendesignpictures-hub.github.io/Kaiser-standartkontrol/drift-hub.html"}
 ];
 
 const EVENTS = [
@@ -378,6 +417,9 @@ const T = {
     goalConfirmDel:"Slet dette mål?",
     wallTxt:(w,tot)=>w===1?"<b>1 sejr</b> i alt. Små sejre tæller – fejr dem.":"<b>"+w+" sejre</b> i alt på tværs af "+tot+" mål. Små sejre tæller – fejr dem.",
     wallEmpty:"Sejrsvæggen venter på din første sejr.",
+    todo:"To-do · denne enhed", todoPh:"Fx: Ring til Multiline om fredagslevering",
+    todoAdd:"Tilføj", todoClear:n=>"Ryd "+n+" udført"+(n===1?"":"e"),
+    todoEmpty:"Ingen opgaver – tilføj din første ovenfor.",
     noEvents:"Ingen begivenheder i dette år endnu – tilføj dem i EVENTS-listen i koden.",
     noSup:q=>"Ingen leverandører matcher \u201E"+q+"\u201C.",
     contact:"Kontakt", phone:"Telefon", email:"E-mail", custNo:"Kundenr.",
@@ -399,6 +441,9 @@ const T = {
     goalConfirmDel:"Delete this goal?",
     wallTxt:(w,tot)=>w===1?"<b>1 win</b> in total. Small wins count – celebrate them.":"<b>"+w+" wins</b> in total across "+tot+" goals. Small wins count – celebrate them.",
     wallEmpty:"The wall of wins is waiting for your first one.",
+    todo:"To-do · this device", todoPh:"E.g.: Call Multiline about Friday delivery",
+    todoAdd:"Add", todoClear:n=>"Clear "+n+" completed",
+    todoEmpty:"No tasks – add your first one above.",
     noEvents:"No events this year yet – add them to the EVENTS list in the code.",
     noSup:q=>"No suppliers match \u201C"+q+"\u201D.",
     contact:"Contact", phone:"Phone", email:"Email", custNo:"Customer no.",
@@ -451,6 +496,7 @@ function renderAll(){
   renderNextUp();
   renderCal();
   renderGoals();
+  renderTodos();
   renderSuppliers();
 }
 
@@ -640,6 +686,56 @@ function renderGoals(){
   document.getElementById("wall").innerHTML=wins
     ?`<div class="wall"><span class="wall-num">${wins}</span><span class="wall-txt">${t().wallTxt(wins,tot)}</span></div>`
     :`<div class="wall"><span class="wall-num">0</span><span class="wall-txt">${esc(t().wallEmpty)}</span></div>`;
+}
+
+/* ---- To-do (pr. enhed) ---- */
+function loadTodos(){
+  try{return JSON.parse(lsGet("todos","[]"));}catch(e){return [];}
+}
+function saveTodos(list){lsSet("todos",JSON.stringify(list));}
+function addTodo(){
+  const el=document.getElementById("todoText");
+  const text=(el.value||"").trim();
+  if(!text)return el.focus();
+  const list=loadTodos();
+  list.push({id:Date.now(),text:text,done:false});
+  saveTodos(list);
+  el.value="";
+  renderTodos();
+  el.focus();
+}
+function toggleTodo(id){
+  const list=loadTodos();
+  const x=list.find(x=>x.id===id);
+  if(x)x.done=!x.done;
+  saveTodos(list);renderTodos();
+}
+function delTodo(id){
+  saveTodos(loadTodos().filter(x=>x.id!==id));renderTodos();
+}
+function clearTodos(){
+  saveTodos(loadTodos().filter(x=>!x.done));renderTodos();
+}
+function renderTodos(){
+  document.getElementById("t-todo").textContent=t().todo;
+  document.getElementById("todoText").placeholder=t().todoPh;
+  document.getElementById("t-todoadd").textContent=t().todoAdd;
+  const list=loadTodos();
+  /* åbne først, udførte nederst – behold indbyrdes rækkefølge */
+  const sorted=list.filter(x=>!x.done).concat(list.filter(x=>x.done));
+  const el=document.getElementById("todos");
+  if(!list.length){
+    el.innerHTML=`<div class="empty">${esc(t().todoEmpty)}</div>`;
+    return;
+  }
+  let html=sorted.map(x=>`<div class="todo ${x.done?"done":""}">
+    <input type="checkbox" class="todo-chk" ${x.done?"checked":""} onchange="toggleTodo(${x.id})">
+    <span class="todo-txt">${esc(x.text)}</span>
+    <button class="todo-del" onclick="delTodo(${x.id})" aria-label="Slet">✕</button>
+  </div>`).join("");
+  const doneCount=list.filter(x=>x.done).length;
+  if(doneCount)html+=`<button class="todo-clear" onclick="clearTodos()">${esc(t().todoClear(doneCount))}</button>`;
+  el.innerHTML=html;
 }
 
 /* ---- Leverandører ---- */
